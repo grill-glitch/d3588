@@ -1,9 +1,8 @@
 #==========================================================================
-# Description: Build Armbian
-# Copyright (C) 2021 https://github.com/ophub/amlogic-s9xxx-armbian
+# Description: Build D3588 Image with armbian
 #==========================================================================
 
-name: Build armbian
+name: Build D3588 Armbian Image
 
 on:
   repository_dispatch:
