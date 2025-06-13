@@ -107,9 +107,13 @@ jobs:
           echo "build_tag=Armbian_D3588_${{ matrix.set_release }}_${{ matrix.set_desktop }}" >> ${GITHUB_OUTPUT}
 
           if [ "${{ matrix.set_desktop }}" == "cli" ] ; then
-            BUILD_DESKTOP=no
+            BUILD_DESKTOP="BUILD_DESKTOP=no"
           else
-            BUILD_DESKTOP=yes
+            BUILD_DESKTOP=" \
+                BUILD_DESKTOP=yes \
+                DESKTOP_APPGROUPS_SELECTED=remote_desktop \
+                DESKTOP_ENVIRONMENT=${{ matrix.set_desktop }} \
+                DESKTOP_ENVIRONMENT_CONFIG_NAME=config_base"
           fi
           # BRANCH=edge    : newest kernel such as 6.10
           # BRANCH=current : stable kernel such as 6.6
@@ -120,8 +124,7 @@ jobs:
                        BUILD_MINIMAL=no \
                        BUILD_ONLY=default \
                        HOST=armbian \
-                       BUILD_DESKTOP=${BUILD_DESKTOP} \
-                       DESKTOP_ENVIRONMENT=${{ matrix.set_desktop }} \
+                       ${BUILD_DESKTOP} \
                        EXPERT=yes \
                        KERNEL_CONFIGURE=no \
                        COMPRESS_OUTPUTIMAGE="sha,img,xz" \

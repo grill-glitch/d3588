@@ -1,3 +1,6 @@
 .back
 /enter-docker.sh
 *.ko
+*.tar.gz
+*.squashfs
+*.img
