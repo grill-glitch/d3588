@@ -7,89 +7,13 @@ name: Autobuild D3588 Armbian Image
 on:
   repository_dispatch:
   workflow_dispatch:
-    inputs:
-      set_release:
-        description: "Select OS Release."
-        required: false
-        default: "jammy"
-        type: choice
-        options:
-          - jammy
-          - noble
+    strategy:
+      matrix:
+        release:
           - bookworm
           - bullseye
-      armbian_board:
-        description: "Select device board."
-        required: false
-        default: "d3588"
-        type: choice
-        options:
-          - d3588
-          - dm60
-          - dc-a588
-      armbian_kernel:
-        description: "Select kernel version."
-        required: false
-        default: "6.1.y_6.12.y"
-        type: choice
-        options:
-          - 5.4.y
-          - 5.10.y
-          - 5.15.y
-          - 6.1.y
-          - 6.6.y
-          - 6.12.y
-          - 5.4.y_5.10.y
-          - 5.15.y_6.1.y
-          - 6.1.y_6.12.y
-          - 6.1.y_6.6.y
-          - 6.6.y_6.12.y
-      auto_kernel:
-        description: "Auto use the latest kernel."
-        required: false
-        default: true
-        type: boolean
-      kernel_repo:
-        description: "Set the kernel repository."
-        required: false
-        default: "ophub/kernel"
-        type: choice
-        options:
-          - ophub/kernel
-      kernel_usage:
-        description: "Set the tags of the stable kernel."
-        required: false
-        default: "stable"
-        type: choice
-        options:
-          - stable
-          - flippy
-          - dev
-          - beta
-      armbian_fstype:
-        description: "Select armbian rootfs type."
-        required: false
-        default: "ext4"
-        type: choice
-        options:
-          - ext4
-          - btrfs
-      armbian_storage:
-        description: "Select image storage type."
-        required: false
-        default: "save"
-        type: choice
-        options:
-          - save
-          - temp
-      builder_name:
-        description: "Set Armbian builder signature."
-        required: false
-        default: "ophub"
-        type: choice
-        options:
-          - ophub
-          - angel
+          - jammy
+          - noble
 
 env:
   TZ: America/New_York
@@ -98,6 +22,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
+
+
+
     if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
 
     steps:
@@ -181,7 +108,7 @@ jobs:
         run: |
           # Compile method and parameter description: https://docs.armbian.com/Developer-Guide_Build-Options
           echo "build_tag=Armbian_D3588_${{ inputs.set_release }}" >> ${GITHUB_OUTPUT}
-          ./compile.sh RELEASE=${{ inputs.set_release }} BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
+          ./compile.sh RELEASE=${{ matrix.release }} BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
                        BUILD_ONLY=default HOST=armbian BUILD_DESKTOP=no EXPERT=yes KERNEL_CONFIGURE=no \
                        COMPRESS_OUTPUTIMAGE="sha,img,xz" SHARE_LOG=yes
           ls -alh /builder/armbian.git/output/images/
