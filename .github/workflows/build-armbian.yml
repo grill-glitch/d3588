@@ -1,5 +1,5 @@
 #==========================================================================
-# Description: Build D3588 Image with armbian
+# Description: Build D3588 Armbian Image
 #==========================================================================
 
 name: Build D3588 Armbian Image
@@ -161,6 +161,8 @@ jobs:
           ls -alh
           du -sh *
           ./build.sh
+          ls -alh rockdev
+          echo "build_tag=D3588_Image" >> ${GITHUB_OUTPUT}
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Download armbian source code
@@ -173,7 +175,7 @@ jobs:
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Compile Armbian [ ${{ inputs.set_release }} ]
-        id: compile
+        id: compile_armbian
         working-directory: /builder/armbian.git
         if: ${{ steps.down_armbian.outputs.status }} == 'success' && !cancelled()
         run: |
@@ -185,22 +187,26 @@ jobs:
           ls -alh /builder/armbian.git/output/images/
           echo "status=success" >> ${GITHUB_OUTPUT}
 
+      - name: Generate rootfs image
+        id: generate_rootfs
+        working-directory: /builder/
+        if: ${{ steps.compile_armbian.outputs.status }} == 'success' && !cancelled()
+        run: |
+          cp -a /builder/armbian.git/output/images/* /builder/d3588.git/rockdev/
+          ls -alh /builder/d3588.git/rockdev/
+          echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Upload Armbian image to Release
+      - name: Upload D3588 image to Release
         uses: ncipollo/release-action@main
-        if: ${{ steps.compile.outputs.status }} == 'success' && !cancelled()
+        if: ${{ steps.generate_rootfs.outputs.status }} == 'success' && !cancelled()
         with:
-          tag: ${{ steps.compile.outputs.build_tag }}
-          artifacts: /builder/build/output/images/*
+          tag: ${{ steps.compile_d3588.outputs.build_tag }}
+          artifacts: /builder/d3588.git/rockdev/*
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            ### Armbian Image information
+            ### D3588 Image information
             - Default username: root
-            - Default password: 1234
-            - Install command: armbian-install
-            - Update command: armbian-update
-            ### Armbian Image Verification
-            - sha256sum
+            - Default password: linux

@@ -144,7 +144,7 @@ jobs:
           sudo chown -R runner.runner /builder
           df -Th
 
-      - name: Download D3588 kernel and uboot code
+      - name: Download D3588 uboot and kernel code
         id: down_d3588
         working-directory: /builder/
         if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
@@ -153,7 +153,7 @@ jobs:
           git clone --recursive --single-branch --branch=master https://github.com/yifengyou/d3588.git d3588.git
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Compile D3588 kernel and uboot code
+      - name: Compile D3588 uboot and kernel code
         id: compile_d3588
         working-directory: /builder/d3588.git
         if: ${{ steps.down_d3588.outputs.status }} == 'success' && !cancelled()
@@ -179,7 +179,3 @@ jobs:
             ### D3588 Image information
             - Default username: root
             - Default password: linux
-            - Install command: kdev-install
-            - Update command: kdev-update
-            ### Armbian Image Verification
-            - sha256sum
