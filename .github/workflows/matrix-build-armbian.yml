@@ -146,6 +146,8 @@ jobs:
           # generate rockdev.squashfs
           cd /builder/d3588.git && mksquashfs rockdev rockdev.squashfs
           mv rockdev.squashfs rockdev
+          # archive modules
+          cd /builder/d3588.git/rockdev && tar -zcvf modules.tar.gz modules
           # generate firmware.img
           echo "status=success" >> ${GITHUB_OUTPUT}
 
