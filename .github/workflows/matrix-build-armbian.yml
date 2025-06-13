@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         # 基础矩阵：发行版列表
-        release: [ bookworm, bullseye, jammy, noble ]
-        desktop: [ cli, gnome, xfce ]
+        set_release: [ bookworm, bullseye, jammy, noble ]
+        set_desktop: [ cli, gnome, xfce ]
 
     if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
     steps:
@@ -104,19 +104,19 @@ jobs:
         if: ${{ steps.down_armbian.outputs.status }} == 'success' && !cancelled()
         run: |
           # Compile method and parameter description: https://docs.armbian.com/Developer-Guide_Build-Options
-          echo "build_tag=Armbian_D3588_${{ matrix.set_release }}_${{ matrix.desktop }}" >> ${GITHUB_OUTPUT}
+          echo "build_tag=Armbian_D3588_${{ matrix.set_release }}_${{ matrix.set_desktop }}" >> ${GITHUB_OUTPUT}
 
-          if [ "${{ matrix.desktop }}" == "cli" ] ; then
+          if [ "${{ matrix.set_desktop }}" == "cli" ] ; then
             echo "BUILD_DESKTOP=no" >> $GITHUB_ENV
           else
             echo "BUILD_DESKTOP=yes" >> $GITHUB_ENV
           fi
 
-          ./compile.sh RELEASE=${{ matrix.release }} \
+          ./compile.sh RELEASE=${{ matrix.set_release }} \
                        BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
                        BUILD_ONLY=default HOST=armbian \
                        BUILD_DESKTOP=${{ env.BUILD_DESKTOP }} \
-                       DESKTOP_ENVIRONMENT=${{ matrix.desktop }} \
+                       DESKTOP_ENVIRONMENT=${{ matrix.set_desktop }} \
                        EXPERT=yes \
                        KERNEL_CONFIGURE=no \
                        COMPRESS_OUTPUTIMAGE="sha,img,xz" \
