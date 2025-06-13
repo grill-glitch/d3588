@@ -41,7 +41,7 @@ jobs:
           sudo rm -f /swapfile /mnt/swapfile
           sudo -E apt-get -y update
           sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-          sudo -E apt-get -y install python2 python2-dev python-is-python3 $(curl -fsSL https://tinyurl.com/ubuntu2204-build-armbian)
+          sudo -E apt-get -y install python2 python2-dev python-is-python3 squashfs-tools $(curl -fsSL https://tinyurl.com/ubuntu2204-build-armbian)
           sudo -E systemctl daemon-reload
           #sudo -E apt-get -y full-upgrade
           sudo -E apt-get -y autoremove --purge
@@ -107,22 +107,25 @@ jobs:
           echo "build_tag=Armbian_D3588_${{ matrix.set_release }}_${{ matrix.set_desktop }}" >> ${GITHUB_OUTPUT}
 
           if [ "${{ matrix.set_desktop }}" == "cli" ] ; then
-            echo "BUILD_DESKTOP=no" >> $GITHUB_ENV
+            BUILD_DESKTOP=no
           else
-            echo "BUILD_DESKTOP=yes" >> $GITHUB_ENV
+            BUILD_DESKTOP=yes
           fi
           # BRANCH=edge    : newest kernel such as 6.10
           # BRANCH=current : stable kernel such as 6.6
           # BRANCH=legacy  : vendor kernel rockchip 5.10
           ./compile.sh RELEASE=${{ matrix.set_release }} \
-                       BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
-                       BUILD_ONLY=default HOST=armbian \
-                       BUILD_DESKTOP=${{ env.BUILD_DESKTOP }} \
+                       BOARD=nanopct6 \
+                       BRANCH=current\
+                       BUILD_MINIMAL=no \
+                       BUILD_ONLY=default \
+                       HOST=armbian \
+                       BUILD_DESKTOP=${BUILD_DESKTOP} \
                        DESKTOP_ENVIRONMENT=${{ matrix.set_desktop }} \
                        EXPERT=yes \
                        KERNEL_CONFIGURE=no \
                        COMPRESS_OUTPUTIMAGE="sha,img,xz" \
-                       VENDOR='kdev' \
+                       VENDOR="kdev" \
                        SHARE_LOG=yes
           ls -alh /builder/armbian.git/output/images/
           echo "status=success" >> ${GITHUB_OUTPUT}
