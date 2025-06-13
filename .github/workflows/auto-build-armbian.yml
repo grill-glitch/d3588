@@ -1,8 +1,8 @@
 #==========================================================================
-# Description: Build D3588 Kernel and Uboot
+# Description: Autobuild D3588 Armbian Image
 #==========================================================================
 
-name: Build D3588 Kernel and Uboot
+name: Autobuild D3588 Armbian Image
 
 on:
   repository_dispatch:
@@ -144,7 +144,7 @@ jobs:
           sudo chown -R runner.runner /builder
           df -Th
 
-      - name: Download D3588 uboot and kernel code
+      - name: Download D3588 kernel and uboot code
         id: down_d3588
         working-directory: /builder/
         if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
@@ -153,7 +153,7 @@ jobs:
           git clone --recursive --single-branch --branch=master https://github.com/yifengyou/d3588.git d3588.git
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Compile D3588 uboot and kernel code
+      - name: Compile D3588 kernel and uboot code
         id: compile_d3588
         working-directory: /builder/d3588.git
         if: ${{ steps.down_d3588.outputs.status }} == 'success' && !cancelled()
@@ -162,14 +162,45 @@ jobs:
           du -sh *
           ./build.sh
           ls -alh rockdev
-          # archive all ko modules
-          cd rockdev && find . -type f -name "*.ko" -print0 | tar -czvf modules.tar.gz --null -T -
-          echo "build_tag=D3588_UBOOT_KERNEL" >> ${GITHUB_OUTPUT}
+          echo "build_tag=D3588_Image" >> ${GITHUB_OUTPUT}
+          echo "status=success" >> ${GITHUB_OUTPUT}
+
+      - name: Download armbian source code
+        id: down_armbian
+        working-directory: /builder/
+        if: ${{ steps.compile_d3588.outputs.status }} == 'success' && !cancelled()
+        run: |
+          df -hT ${PWD}
+          git clone -q --single-branch --depth=1 --branch=main https://github.com/armbian/build.git armbian.git
+          echo "status=success" >> ${GITHUB_OUTPUT}
+
+      - name: Compile Armbian [ ${{ inputs.set_release }} ]
+        id: compile_armbian
+        working-directory: /builder/armbian.git
+        if: ${{ steps.down_armbian.outputs.status }} == 'success' && !cancelled()
+        run: |
+          # Compile method and parameter description: https://docs.armbian.com/Developer-Guide_Build-Options
+          echo "build_tag=Armbian_D3588_${{ inputs.set_release }}" >> ${GITHUB_OUTPUT}
+          ./compile.sh RELEASE=${{ inputs.set_release }} BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
+                       BUILD_ONLY=default HOST=armbian BUILD_DESKTOP=no EXPERT=yes KERNEL_CONFIGURE=no \
+                       COMPRESS_OUTPUTIMAGE="sha,img,xz" SHARE_LOG=yes
+          ls -alh /builder/armbian.git/output/images/
+          echo "status=success" >> ${GITHUB_OUTPUT}
+
+      - name: Generate rootfs image
+        id: generate_rootfs
+        working-directory: /builder/
+        if: ${{ steps.compile_armbian.outputs.status }} == 'success' && !cancelled()
+        run: |
+          cp -a /builder/armbian.git/output/images/* /builder/d3588.git/rockdev/
+          ls -alh /builder/d3588.git/rockdev/
+          chmod +x ./d3588.git/extract-rootfs-from-armbian.sh
+          ./d3588.git/extract-rootfs-from-armbian.sh /builder/d3588.git/rockdev/
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Upload D3588 image to Release
         uses: ncipollo/release-action@main
-        if: ${{ steps.compile_d3588.outputs.status }} == 'success' && !cancelled()
+        if: ${{ steps.generate_rootfs.outputs.status }} == 'success' && !cancelled()
         with:
           tag: ${{ steps.compile_d3588.outputs.build_tag }}
           artifacts: /builder/d3588.git/rockdev/*
@@ -179,5 +210,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ### D3588 Image information
-            - Uboot version: U-Boot 2017.09-kdev
-            - Kernel version: 5.10.226-kdev SMP mod_unload aarch64
+            - Default username: root
+            - Default password: linux
