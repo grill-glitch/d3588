@@ -69,7 +69,7 @@ jobs:
           sudo chown -R runner.runner /builder
           df -Th
 
-      - name: Download D3588 kernel and uboot code
+      - name: Download D3588 Uboot and Kernel code
         id: down_d3588
         working-directory: /builder/
         if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
@@ -78,7 +78,7 @@ jobs:
           git clone --recursive --single-branch --branch=master https://github.com/yifengyou/d3588.git d3588.git
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Compile D3588 kernel and uboot code
+      - name: Compile D3588 Uboot and Kernel code
         id: compile_d3588
         working-directory: /builder/d3588.git
         if: ${{ steps.down_d3588.outputs.status }} == 'success' && !cancelled()
@@ -98,12 +98,12 @@ jobs:
           git clone -q --single-branch --depth=1 --branch=main https://github.com/armbian/build.git armbian.git
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Compile Armbian [ ${{ matrix.set_release }} ]
+      - name: Compile Armbian [ ${{ matrix.set_release }} ] [ ${{ matrix.set_desktop }} ]
         id: compile_armbian
         working-directory: /builder/armbian.git
         if: ${{ steps.down_armbian.outputs.status }} == 'success' && !cancelled()
         run: |
-          # Compile method and parameter description: https://docs.armbian.com/Developer-Guide_Build-Options
+          # set up build tag
           echo "build_tag=Armbian_D3588_${{ matrix.set_release }}_${{ matrix.set_desktop }}" >> ${GITHUB_OUTPUT}
 
           if [ "${{ matrix.set_desktop }}" == "cli" ] ; then
@@ -111,7 +111,9 @@ jobs:
           else
             echo "BUILD_DESKTOP=yes" >> $GITHUB_ENV
           fi
-
+          # BRANCH=edge    : newest kernel such as 6.10
+          # BRANCH=current : stable kernel such as 6.6
+          # BRANCH=legacy  : vendor kernel rockchip 5.10
           ./compile.sh RELEASE=${{ matrix.set_release }} \
                        BOARD=nanopct6 BRANCH=current BUILD_MINIMAL=no \
                        BUILD_ONLY=default HOST=armbian \

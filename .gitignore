@@ -1,2 +1,3 @@
 .back
 /enter-docker.sh
+*.ko
