@@ -36,5 +36,9 @@ dd if=armbian.img of="${TARGET_DIR}/rootfs.img" \
 	count="${count}" \
 	status=progress
 
-ls -alh ${TARGET_DIR}/rootfs.img
-file ${TARGET_DIR}/rootfs.img
+cd ${TARGET_DIR}
+ls -alh rootfs.img
+file rootfs.img
+xz -zv -9 rootfs.img
+
+
