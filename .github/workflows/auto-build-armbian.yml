@@ -7,13 +7,7 @@ name: Autobuild D3588 Armbian Image
 on:
   repository_dispatch:
   workflow_dispatch:
-    strategy:
-      matrix:
-        release:
-          - bookworm
-          - bullseye
-          - jammy
-          - noble
+
 
 env:
   TZ: America/New_York
@@ -23,10 +17,20 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
-
+    strategy:
+      matrix:
+        release: [bookworm, bullseye, jammy, noble]
+        include:
+          - release: bookworm
+            distro_type: debian
+          - release: bullseye
+            distro_type: debian
+          - release: jammy
+            distro_type: ubuntu
+          - release: noble
+            distro_type: ubuntu
 
     if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
