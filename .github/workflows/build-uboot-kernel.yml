@@ -177,5 +177,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ### D3588 Image information
-            - Default username: root
-            - Default password: linux
+            - Uboot version: U-Boot 2017.09-kdev
+            - Kernel version: 5.10.226-kdev SMP mod_unload aarch64
