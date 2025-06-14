@@ -7,4 +7,3 @@ boot    boot.img
 recovery    recovery.img
 rootfs    rootfs.img
 oem    oem.img
-userdata    userdata.img

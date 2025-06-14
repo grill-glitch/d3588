@@ -138,17 +138,27 @@ jobs:
         working-directory: /builder/
         if: ${{ steps.compile_armbian.outputs.status }} == 'success' && !cancelled()
         run: |
-          cp -a /builder/armbian.git/output/images/* /builder/d3588.git/rockdev/
           ls -alh /builder/d3588.git/rockdev/
-          chmod +x ./d3588.git/extract-rootfs-from-armbian.sh
-          # generate /builder/d3588.git/rockdev/rootfs.img
-          ./d3588.git/extract-rootfs-from-armbian.sh /builder/d3588.git/rockdev/
-          # generate rockdev.squashfs
-          cd /builder/d3588.git && mksquashfs rockdev rockdev.squashfs
-          mv rockdev.squashfs rockdev
+          # generate rootfs.img in /builder/armbian.git/output/images/
+          chmod +x /builder/d3588.git/extract-rootfs-from-armbian.sh
+          /builder/d3588.git/extract-rootfs-from-armbian.sh /builder/armbian.git/output/images/
+          mv /builder/armbian.git/output/images/rootfs.img /builder/d3588.git/rockdev/
           # archive modules
-          cd /builder/d3588.git/rockdev && tar -zcvf modules.tar.gz modules
-          # generate firmware.img
+          cd /builder/d3588.git/rockdev && tar -zcvf modules.tar.gz modules && rm -rf modules
+          # generate rockdev.squashfs
+          cd /builder/d3588.git && mksquashfs rockdev rockdev.squashfs && mv rockdev.squashfs rockdev
+          # generate all in one updateable firmware.img
+          chmod +x /builder/d3588.git/tools/afptool
+          chmod +x /builder/d3588.git/tools/rkImageMaker
+          cd /builder/d3588.git/rockdev && \
+              /builder/d3588.git/tools/afptool -pack . temp.img && \
+              /builder/d3588.git/tools/rkImageMaker -RK3588 MiniLoaderAll.bin temp.img update.img -os_type:androidos && \
+              rm -f temp.img
+          cd /builder/d3588.git/rockdev && mksquashfs update.img update.img.squashfs && rm -f update.img
+          # copy Armbian files
+          mv /builder/armbian.git/output/images/Armbian* /builder/d3588.git/rockdev
+          # show all files
+          ls -alh /builder/d3588.git/rockdev/
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Upload D3588 image to Release
