@@ -150,7 +150,7 @@ jobs:
           mv /builder/armbian.git/output/images/rootfs.img /builder/d3588.git/rockdev/
           # hack rootfs, must start with sudo
           sudo mount /builder/d3588.git/rockdev/rootfs.img /mnt
-          sudo echo "tmpfs /tmp tmpfs defaults,nosuid 0 0" > /mnt/etc/fstab
+          sudo bash -c 'echo "tmpfs /tmp tmpfs defaults,nosuid 0 0" >> /mnt/etc/fstab'
           sudo mkdir -p /mnt/lib/modules/kernel
           sudo cp -a /builder/d3588.git/rockdev/modules/* /mnt/lib/modules/kernel/
           sync
