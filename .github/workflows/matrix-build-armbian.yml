@@ -142,12 +142,15 @@ jobs:
           mkdir -p /builder/d3588.git/tools/RKDevTool/rockdev/image/
           mkdir -p /builder/d3588.git/rockdev
           mkdir -p /builder/d3588.git/release
+
           # archive modules
           cd /builder/d3588.git/rockdev && tar -zcvf modules.tar.gz modules
+
           # generate rootfs.img in /builder/armbian.git/output/images/
           chmod +x /builder/d3588.git/extract-rootfs-from-armbian.sh
           /builder/d3588.git/extract-rootfs-from-armbian.sh /builder/armbian.git/output/images/
           mv /builder/armbian.git/output/images/rootfs.img /builder/d3588.git/rockdev/
+
           # hack rootfs, must start with sudo
           sudo mount /builder/d3588.git/rockdev/rootfs.img /mnt
           sudo bash -c 'echo "tmpfs /tmp tmpfs defaults,nosuid 0 0" >> /mnt/etc/fstab'
@@ -155,12 +158,14 @@ jobs:
           sudo cp -a /builder/d3588.git/rockdev/modules/* /mnt/lib/modules/kernel/
           sync
           sudo umount /mnt
+
           # generate all in one updateable update.img
           chmod +x /builder/d3588.git/tools/afptool
           chmod +x /builder/d3588.git/tools/rkImageMaker
           cd /builder/d3588.git/rockdev && \
               /builder/d3588.git/tools/afptool -pack . temp.img && \
               /builder/d3588.git/tools/rkImageMaker -RK3588 MiniLoaderAll.bin temp.img update.img -os_type:androidos
+
           # release update.img.squashfs
           cd /builder/d3588.git/rockdev && mksquashfs update.img  /builder/d3588.git/release/update.img.squashfs
           mv /builder/d3588.git/rockdev/boot.img             /builder/d3588.git/tools/RKDevTool/rockdev/image/
@@ -173,11 +178,14 @@ jobs:
           mv /builder/d3588.git/rockdev/package-file         /builder/d3588.git/tools/RKDevTool/rockdev/image/
           mv /builder/d3588.git/rockdev/recovery.img         /builder/d3588.git/tools/RKDevTool/rockdev/image/
           mv /builder/d3588.git/rockdev/oem.img              /builder/d3588.git/tools/RKDevTool/rockdev/image/
+
           # release rockdev.squashfs
           cd /builder/d3588.git/tools/ && \
             mksquashfs  RKDevTool  /builder/d3588.git/release/rockdev.squashfs
+
           # release Armbian files
           mv /builder/armbian.git/output/images/Armbian* /builder/d3588.git/release
+
           # release image
           mv /builder/d3588.git/tools/RKDevTool/rockdev/image/boot.img             /builder/d3588.git/release/
           mv /builder/d3588.git/tools/RKDevTool/rockdev/image/MiniLoaderAll.bin    /builder/d3588.git/release/
@@ -188,11 +196,14 @@ jobs:
           mv /builder/d3588.git/tools/RKDevTool/rockdev/image/package-file         /builder/d3588.git/release/
           mv /builder/d3588.git/tools/RKDevTool/rockdev/image/recovery.img         /builder/d3588.git/release/
           mv /builder/d3588.git/tools/RKDevTool/rockdev/image/oem.img              /builder/d3588.git/release/
+
           # release rootfs.img.squashfs
           cd /builder/d3588.git/tools/RKDevTool/rockdev/image/ && \
             mksquashfs rootfs.img  /builder/d3588.git/release/rootfs.img.squashfs
+
           # show all files
           ls -alh /builder/d3588.git/release/
+          
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Upload D3588 image to Release
