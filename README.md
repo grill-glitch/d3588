@@ -36,12 +36,16 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 ## 目录
 
 * [开发板信息](docs/开发板信息.md)
-    * [亮钻D3588规格书](文档/亮钻D3588规格书.pdf)
-    * [亮钻D3588机械图](文档/机械图.pdf)
+* [亮钻D3588规格书](文档/亮钻D3588规格书.pdf)
+* [亮钻D3588机械图](文档/机械图.pdf)
+* [Linux烧录方法](文档/Linux烧录方法.pdf)
+* [嵌入式Linux开发快速入门指南](文档/嵌入式Linux开发快速入门指南.pdf)
+* [D3588主板产品规格书v5-20250619](文档/D3588主板产品规格书v5-20250619.pdf)
 * [刷机指引](docs/刷机指引.md)
 * [maskrom救砖](docs/maskrom救砖.md)
 * [固件拆解](docs/固件拆解.md)
 * [亚克力外壳](docs/亚克力外壳.md)
+
 
 
 ---
