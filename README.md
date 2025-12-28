@@ -1,4 +1,4 @@
-# 亮钻科技 D3588 (Rockchip RK3588) 玩耍记录
+# 亮钻（LIONTRON）科技 D3588 (Rockchip RK3588) 玩耍记录
 
 ```
 1. Strictly comply with laws and regulations at all times.
