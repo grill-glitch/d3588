@@ -28,6 +28,7 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 
 * 亮钻官网: <http://www.liontron.cn/showinfo-136-230-0.html>
 
+* 官方烧录包（Android12,Ubuntu22.04）: <https://archive.org/details/rk3588dt-firmware-android-ubuntu>
 
 ---
 
